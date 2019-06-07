@@ -4,4 +4,4 @@
 This is our graphical implementation of the "Breiten-" and the "Tiefensuche".
 We hope you have fun!
 
-- The ALDA/DHIF17 group
+... The ALDA/DHIF17 group
