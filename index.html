@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,19 @@
     <title>BreitenUndTiefen</title>
 
     <link rel="stylesheet" type="text/css" href="./index.css" />
+    <script src="https://kit.fontawesome.com/eeafe44cad.js"></script>
 </head>
+
 <body>
+    <div id="file-modal-back">
+        <i id="file-modal-close" class="fas fa-times"></i>
+        <div id="file-modal">
+            <h3>Upload pattern file</h3>
+            <input type="file" id="file-in" />
+            <button type="button" id="file-in-but">Select</button>
+        </div>
+    </div>
+
     <canvas id="main-canvas"></canvas>
 
     <script src="scripts/Node.js"></script>
@@ -16,4 +28,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

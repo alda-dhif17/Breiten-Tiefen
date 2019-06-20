@@ -54,6 +54,32 @@ function drawArrowhead(context, from, to, radius, color) {
     context.fill();
 }
 
+function parseInfoFile(content) {
+    nodes = JSON.parse(content);
+    for (let i = 0; i < nodes.length; i++) {
+        let n = nodes[i];
+        nodes[i] = new Node(n.name, n.x, n.y, n.r, n.abnutzung, n.edges, n.visited);
+    }
+    for (let n of nodes) {
+        for (let i = 0; i < n.edges.length; i++) {
+            let e = n.edges[i];
+            n.edges[i] = new Edge(nodes[e.from], nodes[e.to]);
+        }
+    }
+    document.getElementById('file-modal-back').style.display = 'none';
+    node_counter = nodes.length;
+    refreshFrame();
+}
+
+function toInfoFile() {
+    let g_cache = [];
+    return JSON.stringify(nodes, (k, v) => {
+        if (k === 'from' || k === 'to')
+            return nodes.indexOf(v);
+        return v;
+    });
+}
+
 function refreshFrame(drawBefore = () => {}, current_node = undefined) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBefore();
@@ -161,7 +187,20 @@ window.onload = () => {
 
             cu_node = n;
         } else if (drawMode === 'terminator') {
-            window.alert('I\'ll be back!');
+            let n = findNode(e.clientX, e.clientY);
+
+            if (!n) {
+                window.alert('Can only delete nodes ... ');
+                return;
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i]===n) {
+                    nodes.splice(i,1);
+                    continue;
+                }
+                nodes[i].removeEdgesTo(n);
+            }
         }
 
         refreshFrame();
@@ -178,7 +217,7 @@ window.onload = () => {
             } else if (drawMode === 'node') {
                 drawMode = 'edge';
             }
-        } else if (e.keyCode === 13) { // 13 ... <Enter>
+        } else if (e.keyCode === 13 && !e.ctrlKey) { // 13 ... <Enter>
             let smode = window.prompt('Search mode: ');
 
             if (smode === 'tiefen') {
@@ -196,8 +235,43 @@ window.onload = () => {
             }
         } else if (e.keyCode === 27) { // 27 ... <Esc>
             cu_node = null;
+            document.getElementById('file-modal-back').style.display = 'none';
+        } else if (e.keyCode === 13 && e.ctrlKey || 
+                e.keyCode === 79 && e.ctrlKey && e.shiftKey) { // 13 ... <ENTER> + <CTRL> || 79 ... <O> + <CTRL> + <SHIFT>
+            e.preventDefault();
+            document.getElementById('file-modal-back').style.display = 'block';
+        } else if (e.keyCode === 83 && e.shiftKey && e.ctrlKey) { // 83 ... <S> + <SHIFT> + <CTRL>
+            e.preventDefault();
+            let a = document.createElement('a');
+            a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(toInfoFile());
+            a.download = 'asdf.but';
+            document.body.appendChild(a);
+
+            a.click();
+            document.body.removeChild(a);
         }
 
         refreshFrame();
+    };
+
+    document.getElementById('file-in-but').onclick = () => {
+        document.getElementById('file-in').click();
+    };
+
+    document.getElementById('file-modal-close').onclick = () => {
+        document.getElementById('file-modal-back').style.display = 'none';
+    };
+
+    document.getElementById('file-in').onchange = () => {
+        if (document.getElementById('file-in').files.length) {
+            let file = document.getElementById('file-in').files[0];
+            let reader = new FileReader();
+
+            reader.onloadend = () => {
+                let content = reader.result;
+                parseInfoFile(content);
+            }
+            reader.readAsText(file);
+        }
     };
 };

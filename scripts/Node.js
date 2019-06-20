@@ -8,15 +8,15 @@ class Node {
         }
     }
 
-    constructor(name, x, y, r) {
+    constructor(name, x, y, r, abnutzung, edges, visited) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.r = r;
 
-        this.abnutzung = 0;
-        this.visited = false;
-        this.edges = [];
+        this.abnutzung = abnutzung || 0;
+        this.visited = visited || false;
+        this.edges = edges || [];
     }
 
     addNeighbour(n) {
@@ -33,6 +33,14 @@ class Node {
 
     visit() {
         this.visited = true;
+    }
+
+    removeEdgesTo(n) {
+        for (let i = this.edges.length-1; i >= 0; i--) {
+            let e = this.edges[i];
+            if (e.to === n)
+                this.edges.splice(i, 1);
+        }
     }
 
     async tiefenSearch(edge = undefined, timeout = default_timeout) {
